@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <numeric>
 #include <sstream>
 #include <string>
 
@@ -11,7 +10,12 @@ using namespace std;
 int main() {
 	ifstream f("input");
 
-	cout << accumulate(istream_iterator<string>(f), {}, 0, [](auto sum, auto str) {
+	struct {
+		int paper;
+		int ribbon;
+	} feet{};
+
+	for_each(istream_iterator<string>(f), {}, [&](auto str) {
 		istringstream ss(str);
 		string dimension;
 
@@ -24,12 +28,23 @@ int main() {
 		getline(ss, dimension, 'x');
 		auto h = stoi(dimension);
 
-		auto sideA = l*w;
-		auto sideB = w*h;
-		auto sideC = h*l;
+		auto areaA = l*w;
+		auto areaB = w*h;
+		auto areaC = h*l;
 
-		auto smallest = min({ sideA, sideB, sideC });
+		auto smallestArea = min({ areaA, areaB, areaC });
 
-		return sum + 2 * sideA + 2 * sideB + 2 * sideC + smallest;
-	}) << endl;
+		feet.paper += 2 * areaA + 2 * areaB + 2 * areaC + smallestArea;
+
+		auto perA = 2 * (l + w);
+		auto perB = 2 * (w + h);
+		auto perC = 2 * (h + l);
+
+		auto smallestPer = min({ perA, perB, perC });
+
+		feet.ribbon += smallestPer + l*w*h;
+	});
+
+	cout << feet.paper << endl;
+	cout << feet.ribbon << endl;
 }
